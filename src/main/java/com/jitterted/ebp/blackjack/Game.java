@@ -17,8 +17,27 @@ public class Game {
   private final List<Card> playerHand = new ArrayList<>();
 
   public static void main(String[] args) {
-    Game game = new Game();
+    displayWelcomeScreen();
 
+    playGame();
+
+    resetScreen();
+  }
+
+  // YAGNI => You Ain't Gonna Need It : "What If?"
+
+
+  private static void playGame() {
+    Game game = new Game();
+    game.initialDeal();
+    game.play();
+  }
+
+  private static void resetScreen() {
+    System.out.println(ansi().reset());
+  }
+
+  private static void displayWelcomeScreen() {
     System.out.println(ansi()
                            .bgBright(Ansi.Color.WHITE)
                            .eraseScreen()
@@ -26,12 +45,6 @@ public class Game {
                            .fgGreen().a("Welcome to")
                            .fgRed().a(" Jitterted's")
                            .fgBlack().a(" BlackJack"));
-
-
-    game.initialDeal();
-    game.play();
-
-    System.out.println(ansi().reset());
   }
 
   public Game() {
@@ -39,44 +52,30 @@ public class Game {
   }
 
   public void initialDeal() {
+    dealRoundOfCards();
+    dealRoundOfCards();
 
-    // deal first round of cards, players first
-    playerHand.add(deck.draw());
-    dealerHand.add(deck.draw());
+  }
 
-    // deal next round of cards
+  /**
+   * Deals a round of cards, to players first due to the rules of Blackjack
+   */
+  private void dealRoundOfCards() {
     playerHand.add(deck.draw());
     dealerHand.add(deck.draw());
   }
 
   public void play() {
-    // get Player's decision: hit until they stand, then they're done (or they go bust)
-    boolean playerBusted = false;
-    while (!playerBusted) {
-      displayGameState();
-      String playerChoice = inputFromPlayer().toLowerCase();
-      if (playerChoice.startsWith("s")) {
-        break;
-      }
-      if (playerChoice.startsWith("h")) {
-        playerHand.add(deck.draw());
-        if (handValueOf(playerHand) > 21) {
-          playerBusted = true;
-        }
-      } else {
-        System.out.println("You need to [H]it or [S]tand");
-      }
-    }
+    boolean playerBusted = playerTurn();
 
-    // Dealer makes its choice automatically based on a simple heuristic (<=16, hit, 17>=stand)
-    if (!playerBusted) {
-      while (handValueOf(dealerHand) <= 16) {
-        dealerHand.add(deck.draw());
-      }
-    }
+    dealerTurn(playerBusted);
 
     displayFinalGameState();
 
+    determineGameOutcome(playerBusted);
+  }
+
+  private void determineGameOutcome(boolean playerBusted) {
     if (playerBusted) {
       System.out.println("You Busted, so you lose.  💸");
     } else if (handValueOf(dealerHand) > 21) {
@@ -88,6 +87,57 @@ public class Game {
     } else {
       System.out.println("You lost to the Dealer. 💸");
     }
+  }
+
+  private void dealerTurn(boolean playerBusted) {
+    if (!playerBusted) {
+      while (shouldDealerHit()) {
+        dealerHand.add(deck.draw());
+      }
+    }
+  }
+
+  private boolean shouldDealerHit() {
+    // Rule (Why?) Dealer makes its choice automatically based on a simple heuristic (<=16, hit, 17>=stand)
+    return handValueOf(dealerHand) <= 16;
+  }
+
+  private boolean playerTurn() {
+    // get Player's decision: hit until they stand, then they're done (or they go bust)
+    boolean playerBusted = false;
+    while (!playerBusted) {
+      displayGameState();
+      String playerChoice = inputFromPlayer().toLowerCase();
+      if (playerChoseStand(playerChoice)) {
+        break;
+      }
+      if (playerHits(playerChoice)) {
+        playerBusted = playerHits(playerBusted);
+      } else {
+        System.out.println("You need to [H]it or [S]tand");
+      }
+    }
+    return playerBusted;
+  }
+
+  private boolean playerHits(boolean playerBusted) {
+    playerHand.add(deck.draw());
+    if (isPlayerBusted()) {
+      playerBusted = true;
+    }
+    return playerBusted;
+  }
+
+  private boolean playerHits(String playerChoice) {
+    return playerChoice.startsWith("h");
+  }
+
+  private boolean isPlayerBusted() {
+    return handValueOf(playerHand) > 21;
+  }
+
+  private boolean playerChoseStand(String playerChoice) {
+    return playerChoice.startsWith("s");
   }
 
   public int handValueOf(List<Card> hand) {
