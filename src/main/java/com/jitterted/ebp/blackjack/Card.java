@@ -33,7 +33,7 @@ public class Card {
     lines[5] = String.format("│       %s%s│", rank.equals("10") ? "" : " ", rank);
     lines[6] = "└─────────┘";
 
-    Ansi.Color cardColor = "♥♦".contains(suit.symbol()) ? Ansi.Color.RED : Ansi.Color.BLACK;
+    Ansi.Color cardColor = suit.isRed() ? Ansi.Color.RED : Ansi.Color.BLACK;
     return ansi()
         .fg(cardColor).toString()
         + String.join(ansi().cursorDown(1)
@@ -43,10 +43,10 @@ public class Card {
 
   @Override
   public String toString() {
-    return "Card {" +
-        "suit=" + suit +
-        ", rank=" + rank +
-        '}';
+    return "Card{" +
+            "suit=" + suit +
+            ", rank='" + rank + '\'' +
+            '}';
   }
 
   @Override
@@ -56,7 +56,7 @@ public class Card {
 
     Card card = (Card) o;
 
-    if (!suit.equals(card.suit)) return false;
+    if (suit != card.suit) return false;
     return rank.equals(card.rank);
   }
 
