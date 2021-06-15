@@ -24,7 +24,7 @@ public class WalletTest {
         Wallet wallet = new Wallet();
 
         // When
-        wallet.addMoney(10);
+        wallet.addMoney(1);
 
         // Then
         assertThat(wallet.isEmpty())
@@ -58,6 +58,24 @@ public class WalletTest {
 
         assertThat(wallet.balance())
                 .isEqualTo(17 + 18);
-
     }
+
+    @Test
+    public void addMoneyOfZeroThrowsException() throws Exception {
+        Wallet wallet = new Wallet();
+
+        assertThatThrownBy(() -> {
+            wallet.addMoney(0);
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    public void addMoneyOfNegativeThrowsException() throws Exception {
+        Wallet wallet = new Wallet();
+
+        assertThatThrownBy(() -> {
+            wallet.addMoney(-1);
+        }).isInstanceOf(IllegalArgumentException.class);
+    }
+
 }
