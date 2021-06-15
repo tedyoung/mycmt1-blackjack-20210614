@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
-class GameBettingPayoffTest {
+class GameBetPayoffTest {
 
     @Test
     public void newGamePlayerBalanceIsZero() throws Exception {
