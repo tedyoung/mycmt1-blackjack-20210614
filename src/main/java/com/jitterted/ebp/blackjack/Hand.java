@@ -49,4 +49,29 @@ public class Hand {
                                .collect(Collectors.joining(
                                  ansi().cursorUp(6).cursorRight(1).toString())));
     }
+
+    public boolean isBusted() {
+      return value() > 21;
+    }
+
+    public boolean pushes(Hand hand) {
+        return value() == hand.value();
+    }
+
+    public boolean beats(Hand hand) {
+        return hand.value() < value();
+    }
+
+    //--- move the methods below to DealerHand subclass
+
+    private boolean shouldDealerHit() {
+      // Rule (Why?) Dealer makes its choice automatically based on a simple heuristic (<=16, hit, 17>=stand)
+      return value() <= 16;
+    }
+
+    public void drawCardsUntilDone(Deck deck) {
+      while (shouldDealerHit()) {
+        drawCard(deck);
+      }
+    }
 }
